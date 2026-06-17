@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexCRM - Client Lead Dashboard</title>
+  <!-- Google Fonts Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- 1. Secure Admin Login Screen -->
+  <div id="login-screen" class="login-overlay">
+    <div class="login-bg-glows">
+      <div class="glow-1"></div>
+      <div class="glow-2"></div>
+    </div>
+    <div class="login-card">
+      <div class="login-header">
+        <div class="logo-icon-container">
+          <i data-lucide="shield-check" class="logo-icon active-glow"></i>
+        </div>
+        <h1>ApexCRM</h1>
+        <p>Lead Management Portal</p>
+      </div>
+      
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <label for="username">Admin Username</label>
+          <div class="input-wrapper">
+            <i data-lucide="user" class="input-icon"></i>
+            <input type="text" id="username" required placeholder="Enter username (admin)" value="admin">
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i data-lucide="lock" class="input-icon"></i>
+            <input type="password" id="password" required placeholder="Enter password (admin123)" value="admin123">
+            <button type="button" id="toggle-password" class="password-toggle-btn">
+              <i data-lucide="eye" class="toggle-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="login-error" class="login-error-message hidden">
+          <i data-lucide="alert-circle"></i>
+          <span>Invalid username or password. Try admin / admin123</span>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+          <span>Sign In Securely</span>
+          <i data-lucide="arrow-right"></i>
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <p>Secure administrative access only. System activity is logged.</p>
+        <span class="credentials-tip">Tip: Use <code>admin</code> / <code>admin123</code></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Main CRM Application Container -->
+  <div id="app-container" class="app-layout hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-box">
+            <i data-lucide="zap" class="logo-brand-icon"></i>
+          </div>
+          <span class="logo-text">ApexCRM</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li>
+            <button class="nav-btn active" data-tab="dashboard">
+              <i data-lucide="layout-dashboard"></i>
+              <span>Dashboard</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-tab="kanban">
+              <i data-lucide="kanban-square"></i>
+              <span>Pipeline Board</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn" data-tab="list">
+              <i data-lucide="users"></i>
+              <span>Leads Directory</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-btn font-simulator-tab-btn" data-tab="simulator">
+              <i data-lucide="globe"></i>
+              <span>Site Simulator</span>
+              <span class="badge badge-accent">Live</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">
+            <span>AD</span>
+          </div>
+          <div class="user-info">
+            <span class="user-name">System Administrator</span>
+            <span class="user-role">Role: Owner</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="logout-btn" title="Sign Out">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="app-content-wrapper">
+      <!-- Top Header Navigation -->
+      <header class="app-header">
+        <div class="header-left">
+          <h2 id="page-title">Dashboard Overview</h2>
+          <p id="page-subtitle" class="text-muted">Welcome back. Here is the latest performance on lead conversions.</p>
+        </div>
+        <div class="header-right">
+          <button id="seed-leads-btn" class="btn btn-secondary">
+            <i data-lucide="database"></i>
+            <span>Seed Sample Leads</span>
+          </button>
+          <div class="system-time">
+            <i data-lucide="clock"></i>
+            <span id="live-time">11:24 AM</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="tab-content-container">
+        
+        <!-- Tab 1: Dashboard View -->
+        <section id="tab-dashboard" class="tab-panel active">
+          <!-- Stat cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card text-glow-indigo">
+              <div class="kpi-header">
+                <span class="kpi-title">Total Ingested Leads</span>
+                <div class="kpi-icon-wrapper bg-indigo">
+                  <i data-lucide="users"></i>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-total-leads">0</div>
+              <div class="kpi-footer">
+                <i data-lucide="trending-up" class="trend-icon"></i>
+                <span id="kpi-lead-growth">All sources active</span>
+              </div>
+            </div>
+
+            <div class="kpi-card text-glow-amber">
+              <div class="kpi-header">
+                <span class="kpi-title">New (Unassigned)</span>
+                <div class="kpi-icon-wrapper bg-amber">
+                  <i data-lucide="sparkles"></i>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-new-leads">0</div>
+              <div class="kpi-footer">
+                <span class="text-amber" id="kpi-new-alert">Needs immediate review</span>
+              </div>
+            </div>
+
+            <div class="kpi-card text-glow-blue">
+              <div class="kpi-header">
+                <span class="kpi-title">Contacted / In Progress</span>
+                <div class="kpi-icon-wrapper bg-blue">
+                  <i data-lucide="phone-call"></i>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-contacted-leads">0</div>
+              <div class="kpi-footer">
+                <span id="kpi-contacted-pct">0% active follow-ups</span>
+              </div>
+            </div>
+
+            <div class="kpi-card text-glow-emerald">
+              <div class="kpi-header">
+                <span class="kpi-title">Converted Clients</span>
+                <div class="kpi-icon-wrapper bg-emerald">
+                  <i data-lucide="check-circle-2"></i>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-converted-leads">0</div>
+              <div class="kpi-footer">
+                <span class="text-emerald" id="kpi-conversion-rate">0% Conversion Rate</span>
+              </div>
+            </div>
+
+            <div class="kpi-card text-glow-purple">
+              <div class="kpi-header">
+                <span class="kpi-title">Total Won Value</span>
+                <div class="kpi-icon-wrapper bg-purple">
+                  <i data-lucide="dollar-sign"></i>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-pipeline-value">$0</div>
+              <div class="kpi-footer">
+                <span id="kpi-pipeline-text">Ingested contract value</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mid Section Grid: Chart & Follow-up reminders -->
+          <div class="dashboard-details-grid">
+            <!-- Analytics Chart -->
+            <div class="glass-panel analytics-panel">
+              <div class="panel-header">
+                <h3>Lead Generation Breakdown</h3>
+                <span class="text-muted">By Referral Source</span>
+              </div>
+              <div class="chart-content">
+                <!-- Beautiful CSS / SVG Chart container -->
+                <div id="source-chart-container" class="source-chart-container">
+                  <!-- Generated dynamically in JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Follow-up Alerts & Reminders -->
+            <div class="glass-panel reminders-panel">
+              <div class="panel-header">
+                <div class="title-with-badge">
+                  <h3>Actionable Follow-Ups</h3>
+                  <span class="badge badge-error" id="reminder-count">0</span>
+                </div>
+                <span class="text-muted">Leads scheduled for contact</span>
+              </div>
+              <div class="reminders-list-wrapper">
+                <ul id="reminders-list" class="reminders-list">
+                  <!-- Rendered dynamically -->
+                  <li class="empty-state">
+                    <i data-lucide="calendar-check"></i>
+                    <p>All caught up! No scheduled follow-ups.</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 2: Kanban View -->
+        <section id="tab-kanban" class="tab-panel">
+          <div class="kanban-board-container">
+            <!-- Columns: New, Contacted, Converted -->
+            <div class="kanban-column" id="kanban-col-new" data-status="new">
+              <div class="kanban-column-header text-glow-amber">
+                <div class="column-header-title">
+                  <span class="column-dot bg-amber"></span>
+                  <h3>New Leads</h3>
+                </div>
+                <span class="column-count badge" id="count-kanban-new">0</span>
+              </div>
+              <div class="kanban-cards-wrapper" id="kanban-cards-new">
+                <!-- Cards appended here -->
+              </div>
+            </div>
+
+            <div class="kanban-column" id="kanban-col-contacted" data-status="contacted">
+              <div class="kanban-column-header text-glow-blue">
+                <div class="column-header-title">
+                  <span class="column-dot bg-blue"></span>
+                  <h3>Contacted</h3>
+                </div>
+                <span class="column-count badge" id="count-kanban-contacted">0</span>
+              </div>
+              <div class="kanban-cards-wrapper" id="kanban-cards-contacted">
+                <!-- Cards appended here -->
+              </div>
+            </div>
+
+            <div class="kanban-column" id="kanban-col-converted" data-status="converted">
+              <div class="kanban-column-header text-glow-emerald">
+                <div class="column-header-title">
+                  <span class="column-dot bg-emerald"></span>
+                  <h3>Converted</h3>
+                </div>
+                <span class="column-count badge" id="count-kanban-converted">0</span>
+              </div>
+              <div class="kanban-cards-wrapper" id="kanban-cards-converted">
+                <!-- Cards appended here -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 3: List View -->
+        <section id="tab-list" class="tab-panel">
+          <div class="glass-panel directory-panel">
+            <div class="directory-toolbar">
+              <!-- Search -->
+              <div class="search-input-wrapper">
+                <i data-lucide="search"></i>
+                <input type="text" id="lead-search" placeholder="Search leads by name, email, company...">
+              </div>
+              
+              <!-- Filters -->
+              <div class="filters-group">
+                <div class="filter-item">
+                  <label for="filter-status">Status</label>
+                  <select id="filter-status">
+                    <option value="all">All Statuses</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="converted">Converted</option>
+                  </select>
+                </div>
+
+                <div class="filter-item">
+                  <label for="filter-source">Source</label>
+                  <select id="filter-source">
+                    <option value="all">All Sources</option>
+                    <option value="Google Search">Google Search</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Direct Web">Direct Web</option>
+                    <option value="Social Media">Social Media</option>
+                    <option value="Referral">Referral</option>
+                  </select>
+                </div>
+
+                <div class="filter-item">
+                  <label for="sort-leads">Sort By</label>
+                  <select id="sort-leads">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="name-asc">Name A-Z</option>
+                    <option value="value-desc">Highest Value</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Leads Table -->
+            <div class="table-responsive">
+              <table class="leads-table">
+                <thead>
+                  <tr>
+                    <th>Lead Name</th>
+                    <th>Status</th>
+                    <th>Email & Phone</th>
+                    <th>Source</th>
+                    <th>Est. Budget</th>
+                    <th>Date Added</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="leads-table-body">
+                  <!-- Dynamic Rows -->
+                </tbody>
+              </table>
+              <div id="table-empty-state" class="table-empty-state hidden">
+                <i data-lucide="users-2"></i>
+                <p>No leads found matching the filters.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 4: Site Contact Form Simulator -->
+        <section id="tab-simulator" class="tab-panel">
+          <div class="simulator-layout">
+            <!-- Simulated Landing Page and Form -->
+            <div class="glass-panel mock-website-container">
+              <div class="website-browser-header">
+                <div class="browser-dots">
+                  <span class="dot-red"></span>
+                  <span class="dot-yellow"></span>
+                  <span class="dot-green"></span>
+                </div>
+                <div class="browser-address-bar">
+                  <i data-lucide="lock" class="secure-icon"></i>
+                  <span>https://www.yourcompany.com/contact</span>
+                </div>
+              </div>
+              
+              <div class="website-canvas">
+                <div class="website-hero">
+                  <h2>Let's build something great.</h2>
+                  <p>Get in touch with our solutions experts. We typically respond within 2 hours.</p>
+                </div>
+                
+                <!-- Contact Form -->
+                <form id="public-contact-form" class="website-form">
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="form-name">Full Name *</label>
+                      <input type="text" id="form-name" required placeholder="e.g. John Doe">
+                    </div>
+                    <div class="form-field">
+                      <label for="form-email">Email Address *</label>
+                      <input type="email" id="form-email" required placeholder="e.g. john@company.com">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="form-phone">Phone Number</label>
+                      <input type="tel" id="form-phone" placeholder="e.g. +1 (555) 019-2834">
+                    </div>
+                    <div class="form-field">
+                      <label for="form-company">Company Name</label>
+                      <input type="text" id="form-company" placeholder="e.g. Acme Corporation">
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="form-service">Service Requested</label>
+                      <select id="form-service">
+                        <option value="Enterprise Software">Enterprise Software Suite</option>
+                        <option value="Cloud Migration">Cloud Migration Consulting</option>
+                        <option value="UI/UX Redesign">UI/UX Interface Redesign</option>
+                        <option value="Digital Marketing">Digital Marketing Campaign</option>
+                        <option value="Other Consultancy">Other Technical Consultation</option>
+                      </select>
+                    </div>
+                    <div class="form-field">
+                      <label for="form-budget">Project Budget *</label>
+                      <select id="form-budget" required>
+                        <option value="" disabled selected>Select a budget range</option>
+                        <option value="2500">$1,000 – $5,000</option>
+                        <option value="7500">$5,000 – $10,000</option>
+                        <option value="25000">$10,000 – $50,000</option>
+                        <option value="75000">$50,000 – $100,000</option>
+                        <option value="150000">$100,000+</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="form-source">Where did you hear about us?</label>
+                    <select id="form-source">
+                      <option value="Google Search">Google Search</option>
+                      <option value="LinkedIn">LinkedIn Feed/Post</option>
+                      <option value="Social Media">Other Social Media</option>
+                      <option value="Referral">Word of Mouth / Referral</option>
+                      <option value="Direct Web">Direct URL Access</option>
+                    </select>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="form-message">Tell us about your project *</label>
+                    <textarea id="form-message" required rows="4" placeholder="Describe your project goals, timelines, and technical requirements..."></textarea>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary btn-block btn-simulated-submit">
+                    <span>Submit Request</span>
+                    <i data-lucide="send"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Simulation Feed and Live Metrics -->
+            <div class="glass-panel visitor-simulation-feed">
+              <div class="panel-header">
+                <div class="title-with-badge">
+                  <h3>Simulated Traffic Log</h3>
+                  <span class="pulse-indicator"></span>
+                </div>
+                <span class="text-muted">Live customer interaction simulator</span>
+              </div>
+              
+              <div class="traffic-metrics-mini">
+                <div class="mini-stat">
+                  <span class="mini-label">Active Users</span>
+                  <span class="mini-value">24</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Avg. Engagement</span>
+                  <span class="mini-value">3m 42s</span>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-label">Bounce Rate</span>
+                  <span class="mini-value">28.4%</span>
+                </div>
+              </div>
+
+              <div class="sim-feed-content" id="sim-feed-list">
+                <!-- Populated dynamically via interval script -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- 3. Sliding Detail Drawer Module -->
+  <div id="lead-drawer" class="drawer-overlay hidden">
+    <div class="drawer-panel">
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <div class="drawer-title-group">
+          <span class="text-muted text-xs" id="drawer-created-at">Created June 15, 2026</span>
+          <h2 id="drawer-lead-name">Jane Doe</h2>
+          <span class="text-muted text-sm" id="drawer-lead-company">Acme Ltd</span>
+        </div>
+        <button id="drawer-close-btn" class="drawer-close-btn">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- Drawer Tabs or sections -->
+      <div class="drawer-body">
+        
+        <!-- Status & Est. Budget Quick Actions -->
+        <div class="drawer-section quick-actions-row">
+          <div class="action-field">
+            <label for="drawer-status">Pipeline Status</label>
+            <select id="drawer-status" class="status-selector">
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="converted">Converted</option>
+            </select>
+          </div>
+          
+          <div class="action-field">
+            <label for="drawer-budget">Assigned Budget ($)</label>
+            <input type="number" id="drawer-budget" class="budget-input" placeholder="Value">
+          </div>
+        </div>
+
+        <!-- Follow-up Scheduler -->
+        <div class="drawer-section follow-up-section">
+          <h3>
+            <i data-lucide="calendar"></i>
+            <span>Schedule Follow-Up Reminder</span>
+          </h3>
+          <div class="scheduler-row">
+            <input type="date" id="drawer-follow-up-date" class="follow-up-input">
+            <button id="btn-save-follow-up" class="btn btn-secondary">Set Reminder</button>
+          </div>
+          <div id="active-follow-up-badge" class="follow-up-badge-container hidden">
+            <i data-lucide="bell" class="bell-shake"></i>
+            <span>Scheduled contact on <strong id="follow-up-badge-date">06/20/2026</strong></span>
+            <button id="btn-clear-follow-up" class="btn-clear-icon" title="Clear reminder">
+              <i data-lucide="x-circle"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="drawer-section">
+          <h3>
+            <i data-lucide="info"></i>
+            <span>Lead Information</span>
+          </h3>
+          
+          <div class="details-grid">
+            <div class="detail-cell">
+              <span class="detail-label">Email Address</span>
+              <span class="detail-value" id="drawer-email">jane@acme.com</span>
+            </div>
+            
+            <div class="detail-cell">
+              <span class="detail-label">Phone Number</span>
+              <span class="detail-value" id="drawer-phone">+1 (555) 012-3456</span>
+            </div>
+
+            <div class="detail-cell">
+              <span class="detail-label">Lead Source</span>
+              <span class="detail-value highlight-badge" id="drawer-source">Google Search</span>
+            </div>
+
+            <div class="detail-cell">
+              <span class="detail-label">Service Requested</span>
+              <span class="detail-value" id="drawer-service">Cloud Migration</span>
+            </div>
+          </div>
+
+          <div class="message-block">
+            <span class="detail-label">Message Details</span>
+            <blockquote id="drawer-message" class="message-quote">
+              "We are looking to transition our current infrastructure to AWS and require consultancy."
+            </blockquote>
+          </div>
+        </div>
+
+        <!-- Notes and Follow-ups -->
+        <div class="drawer-section">
+          <h3>
+            <i data-lucide="message-square"></i>
+            <span>Interaction Logs & Notes</span>
+          </h3>
+
+          <!-- Add Note Form -->
+          <form id="add-note-form" class="add-note-form">
+            <div class="note-type-selection">
+              <label class="radio-tab">
+                <input type="radio" name="note-type" value="note" checked>
+                <span><i data-lucide="file-text"></i> Note</span>
+              </label>
+              <label class="radio-tab">
+                <input type="radio" name="note-type" value="call">
+                <span><i data-lucide="phone"></i> Call Log</span>
+              </label>
+              <label class="radio-tab">
+                <input type="radio" name="note-type" value="email">
+                <span><i data-lucide="mail"></i> Email</span>
+              </label>
+            </div>
+            <textarea id="note-text" required placeholder="Add logs from phone calls, emails, or general notes..." rows="3"></textarea>
+            <button type="submit" class="btn btn-secondary btn-sm note-submit-btn">
+              <i data-lucide="plus"></i>
+              <span>Append Log Entry</span>
+            </button>
+          </form>
+
+          <!-- Timeline -->
+          <div class="timeline-container">
+            <div id="drawer-timeline" class="timeline">
+              <!-- Logs rendered here -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript File -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>
